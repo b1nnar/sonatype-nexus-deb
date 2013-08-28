@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.docprocess.dx</groupId>
+    <artifactId>nexus-webapp-deb</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <name>DocXchange :: Sonatype Nexus OSS Debian Packager</name>
+    <description>Creates a debian package for installing Sonatype Nexus OSS.</description>
+
+    <prerequisites>
+        <maven>3.0.5</maven>
+    </prerequisites>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <debian.dependencies>tomcat7</debian.dependencies>
+        <nexus-webapp.version>2.6.2-01</nexus-webapp.version>
+        <jdeb.version>1.0</jdeb.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.sonatype.nexus</groupId>
+            <artifactId>nexus-webapp</artifactId>
+            <version>${nexus-webapp.version}</version>
+            <type>war</type>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>nexus-webapp</finalName>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/deb/etc</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}/etc</targetPath>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <overlays>
+                        <overlay>
+                            <!-- empty groupId/artifactId represents the current build -->
+                        </overlay>
+                        <overlay>
+                            <id>nexus-overlay</id>
+                            <groupId>org.sonatype.nexus</groupId>
+                            <artifactId>nexus-webapp</artifactId>
+                        </overlay>
+                    </overlays>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.vafer</groupId>
+                <artifactId>jdeb</artifactId>
+                <version>${jdeb.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jdeb</goal>
+                        </goals>
+                        <configuration>
+                            <verbose>true</verbose>
+                            <controlDir>${basedir}/src/deb/control</controlDir>
+                            <dataSet>
+                                <data>
+                                    <src>${project.build.directory}/${project.build.finalName}.war</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/var/lib/tomcat7/webapps</prefix>
+                                        <user>loader</user>
+                                        <group>loader</group>
+                                    </mapper>
+                                </data>
+                                <!--<data>-->
+                                    <!--<src>${project.build.directory}/etc</src>-->
+                                    <!--<type>directory</type>-->
+                                    <!--<mapper>-->
+                                        <!--<type>perm</type>-->
+                                        <!--<prefix>/etc</prefix>-->
+                                        <!--<user>loader</user>-->
+                                        <!--<group>loader</group>-->
+                                    <!--</mapper>-->
+                                <!--</data>-->
+                            </dataSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    
+</project>
