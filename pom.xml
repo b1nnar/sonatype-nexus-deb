@@ -10,7 +10,7 @@
     <packaging>war</packaging>
 
     <name>DocXchange :: Sonatype Nexus OSS Debian Packager</name>
-    <description>Creates a debian package for installing Sonatype Nexus OSS.</description>
+    <description>Generates a debian package for installing Sonatype Nexus OSS.</description>
 
     <prerequisites>
         <maven>3.0.5</maven>
@@ -18,9 +18,24 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <debian.dependencies>tomcat7</debian.dependencies>
         <nexus-webapp.version>2.6.2-01</nexus-webapp.version>
+        <maven-resources-plugin.version>2.3</maven-resources-plugin.version>
+        <maven-war-plugin.version>2.4</maven-war-plugin.version>
         <jdeb.version>1.0</jdeb.version>
+
+        <!--WAR and DEB Package Configuration-->
+        <debian.dependencies>tomcat7</debian.dependencies>
+        <debian.tomcatUser>tomcat7</debian.tomcatUser>
+        <debian.tomcatGroup>tomcat7</debian.tomcatGroup>
+        <!--The name of the resulting war - will impact on the URL of the web application.-->
+        <webapp.finalName>nexus</webapp.finalName>
+        <!--Where the resulting war will be deployed on the target machine.-->
+        <webapp.deployLocation>/var/lib/tomcat7/webapps</webapp.deployLocation>
+        <!--The name of the Sonatype Nexus working directory-->
+        <webapp.nexusWork>nexus-data</webapp.nexusWork>
+        <!--Where Sonatype Nexus will locate it's working directory - this should also be in 'plexus.properties' for
+            'nexus-work' property.-->
+        <webapp.nexusWorkLocation>/home/${webapp.nexusWork}</webapp.nexusWorkLocation>
     </properties>
 
     <dependencies>
@@ -34,20 +49,32 @@
     </dependencies>
 
     <build>
-        <finalName>nexus-webapp</finalName>
+
+        <finalName>${webapp.finalName}</finalName>
+
         <resources>
             <resource>
-                <directory>${project.basedir}/src/deb/etc</directory>
+                <directory>${project.basedir}/src/deb/control</directory>
                 <filtering>true</filtering>
-                <targetPath>${project.build.directory}/etc</targetPath>
+                <targetPath>${project.build.directory}/deb/control</targetPath>
             </resource>
         </resources>
 
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven-resources-plugin.version}</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.4</version>
+                <version>${maven-war-plugin.version}</version>
                 <configuration>
                     <overlays>
                         <overlay>
@@ -61,6 +88,7 @@
                     </overlays>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.vafer</groupId>
                 <artifactId>jdeb</artifactId>
@@ -73,34 +101,26 @@
                         </goals>
                         <configuration>
                             <verbose>true</verbose>
-                            <controlDir>${basedir}/src/deb/control</controlDir>
+                            <controlDir>${project.build.directory}/deb/control</controlDir>
                             <dataSet>
                                 <data>
                                     <src>${project.build.directory}/${project.build.finalName}.war</src>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
-                                        <prefix>/var/lib/tomcat7/webapps</prefix>
+                                        <prefix>${webapp.deployLocation}</prefix>
                                         <user>loader</user>
                                         <group>loader</group>
                                     </mapper>
                                 </data>
-                                <!--<data>-->
-                                    <!--<src>${project.build.directory}/etc</src>-->
-                                    <!--<type>directory</type>-->
-                                    <!--<mapper>-->
-                                        <!--<type>perm</type>-->
-                                        <!--<prefix>/etc</prefix>-->
-                                        <!--<user>loader</user>-->
-                                        <!--<group>loader</group>-->
-                                    <!--</mapper>-->
-                                <!--</data>-->
                             </dataSet>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
+
     </build>
     
 </project>

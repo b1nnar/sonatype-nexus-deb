@@ -1,5 +1,4 @@
 #!/bin/sh
-mkdir /var/lib/sonatype-nexus
-mkdir /var/lib/sonatype-nexus/sonatype-work
-chown -R tomcat7.tomcat7 /var/lib/sonatype-nexus/sonatype-work
-echo "Thank you for installing Sonatype Nexus OSS through this debian package."
+mkdir ${webapp.nexusWorkLocation}
+chown -R ${debian.tomcatUser}.${debian.tomcatGroup} ${webapp.nexusWorkLocation}
+echo "Thank you for installing Sonatype Nexus OSS through this debian package!"
