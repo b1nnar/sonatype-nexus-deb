@@ -4,12 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.docprocess.dx</groupId>
+    <groupId>com.docprocess</groupId>
     <artifactId>nexus-webapp-deb</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
 
-    <name>DocXchange :: Sonatype Nexus OSS Debian Packager</name>
+    <name>Sonatype Nexus OSS :: Debian Packager</name>
     <description>Generates a debian package for installing Sonatype Nexus OSS.</description>
 
     <prerequisites>
@@ -21,6 +21,7 @@
         <nexus-webapp.version>2.6.2-01</nexus-webapp.version>
         <maven-resources-plugin.version>2.3</maven-resources-plugin.version>
         <maven-war-plugin.version>2.4</maven-war-plugin.version>
+		<maven-release-plugin.version>2.4.1</maven-release-plugin.version>
         <jdeb.version>1.0</jdeb.version>
 
         <!--WAR and DEB Package Configuration-->
@@ -47,9 +48,15 @@
             <scope>runtime</scope>
         </dependency>
     </dependencies>
+	
+	<scm>
+		<connection>scm:git:git@github.com:apiticas/nexus-webapp-deb.git</connection>
+		<url>scm:git:git@github.com:apiticas/nexus-webapp-deb.git</url>
+		<developerConnection>scm:git:git@github.com:apiticas/nexus-webapp-deb.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
 
     <build>
-
         <finalName>${webapp.finalName}</finalName>
 
         <resources>
@@ -118,9 +125,24 @@
                     </execution>
                 </executions>
             </plugin>
-
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>${maven-release-plugin.version}</version>
+			</plugin>
         </plugins>
-
     </build>
+	
+	<distributionManagement>
+		<snapshotRepository>
+			<id>docprocess-dx-snapshots</id>
+			<url>http://dev.doc-process.com/nexus/content/repositories/dx-snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>docprocess-dx-releases</id>
+			<url>http://dev.doc-process.com/nexus/content/repositories/dx-releases</url>
+		</repository>
+	</distributionManagement>
     
 </project>
