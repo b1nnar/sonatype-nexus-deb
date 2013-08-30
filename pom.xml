@@ -4,7 +4,7 @@
 
     <groupId>com.docprocess</groupId>
     <artifactId>nexus-webapp-deb</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>Sonatype Nexus OSS :: Debian Packager</name>
@@ -51,7 +51,7 @@
 		<connection>scm:git:git@github.com:apiticas/nexus-webapp-deb.git</connection>
 		<url>scm:git:git@github.com:apiticas/nexus-webapp-deb.git</url>
 		<developerConnection>scm:git:git@github.com:apiticas/nexus-webapp-deb.git</developerConnection>
-		<tag>nexus-webapp-deb-0.0.1</tag>
+		<tag>HEAD</tag>
 	</scm>
 
     <build>
