@@ -4,7 +4,7 @@
 
     <groupId>com.docprocess</groupId>
     <artifactId>sonatype-nexus-deb</artifactId>
-    <version>${nexus-webapp.version}-0</version>
+    <version>${nexus-webapp.version}-0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>Sonatype Nexus OSS :: Debian Packager</name>
