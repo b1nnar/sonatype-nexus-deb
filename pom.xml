@@ -3,65 +3,56 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.docprocess</groupId>
-    <artifactId>nexus-webapp-deb</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <artifactId>sonatype-nexus-deb</artifactId>
+    <version>${nexus-webapp.version}-0</version>
     <packaging>war</packaging>
 
     <name>Sonatype Nexus OSS :: Debian Packager</name>
-    <description>Generates a debian package for installing Sonatype Nexus OSS.</description>
-
-    <prerequisites>
-        <maven>3.0.5</maven>
-    </prerequisites>
+    <description>Debian package for installing Sonatype Nexus OSS.</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <nexus-webapp.version>2.6.2-01</nexus-webapp.version>
+
         <maven-resources-plugin.version>2.3</maven-resources-plugin.version>
         <maven-war-plugin.version>2.4</maven-war-plugin.version>
-		<maven-release-plugin.version>2.4.1</maven-release-plugin.version>
-        <jdeb.version>1.0</jdeb.version>
+	<maven-release-plugin.version>2.4.1</maven-release-plugin.version>
+
+        <jdeb.version>1.0.1</jdeb.version>
+        <nexus-webapp.artifactId>nexus-webapp</nexus-webapp.artifactId>
+        <nexus-webapp.version>2.7.0-m1</nexus-webapp.version>
 
         <!--WAR and DEB Package Configuration-->
+        <debian.sonatype-nexus-home>/usr/share/sonatype-nexus</debian.sonatype-nexus-home>
+        <!--Sonatype Nexus working directory-->
+        <debian.sonatype-nexus-data>/var/lib/nexus-data</debian.sonatype-nexus-data>
+        <debian.webapps-home>/var/lib/tomcat7/webapps</debian.webapps-home>
+        <debian.webappPath>/nexus</debian.webappPath>
         <debian.dependencies>tomcat7</debian.dependencies>
-        <debian.tomcatUser>tomcat7</debian.tomcatUser>
-        <debian.tomcatGroup>tomcat7</debian.tomcatGroup>
-        <!--The name of the resulting war - will impact on the URL of the web application.-->
-        <webapp.finalName>nexus</webapp.finalName>
-        <!--Where the resulting war will be deployed on the target machine.-->
-        <webapp.deployLocation>/var/lib/tomcat7/webapps</webapp.deployLocation>
-        <!--The name of the Sonatype Nexus working directory-->
-        <webapp.nexusWork>nexus-data</webapp.nexusWork>
-        <!--Where Sonatype Nexus will locate it's working directory - this should also be in 'plexus.properties' for
-            'nexus-work' property.-->
-        <webapp.nexusWorkLocation>/home/${webapp.nexusWork}</webapp.nexusWorkLocation>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.sonatype.nexus</groupId>
-            <artifactId>nexus-webapp</artifactId>
+            <artifactId>${nexus-webapp.artifactId}</artifactId>
             <version>${nexus-webapp.version}</version>
             <type>war</type>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
 	
-	<scm>
-		<connection>scm:git:git@github.com:apiticas/nexus-webapp-deb.git</connection>
-		<url>scm:git:git@github.com:apiticas/nexus-webapp-deb.git</url>
-		<developerConnection>scm:git:git@github.com:apiticas/nexus-webapp-deb.git</developerConnection>
-		<tag>HEAD</tag>
-	</scm>
+    <scm>
+	<connection>scm:git:git@github.com:apiticas/nexus-webapp-deb.git</connection>
+	<url>scm:git:git@github.com:apiticas/nexus-webapp-deb.git</url>
+	<developerConnection>scm:git:git@github.com:apiticas/nexus-webapp-deb.git</developerConnection>
+	<tag>HEAD</tag>
+   </scm>
 
     <build>
-        <finalName>${webapp.finalName}</finalName>
 
         <resources>
             <resource>
-                <directory>${project.basedir}/src/deb/control</directory>
+                <directory>src/main/resources</directory>
                 <filtering>true</filtering>
-                <targetPath>${project.build.directory}/deb/control</targetPath>
             </resource>
         </resources>
 
@@ -69,26 +60,22 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>${maven-resources-plugin.version}</version>
-                <configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>${maven-war-plugin.version}</version>
                 <configuration>
+                    <warName>${nexus-webapp.artifactId}-${nexus-webapp.version}</warName>
+                    <webResources>
+                        <resource>
+                            <filtering>true</filtering>
+                            <targetPath>WEB-INF</targetPath>
+                            <directory>src/main/resources/WEB-INF</directory>
+                        </resource>
+                    </webResources>
                     <overlays>
-                        <overlay>
-                            <!-- empty groupId/artifactId represents the current build -->
-                        </overlay>
                         <overlay>
                             <id>nexus-overlay</id>
                             <groupId>org.sonatype.nexus</groupId>
-                            <artifactId>nexus-webapp</artifactId>
+                            <artifactId>${nexus-webapp.artifactId}</artifactId>
                         </overlay>
                     </overlays>
                 </configuration>
@@ -105,18 +92,27 @@
                             <goal>jdeb</goal>
                         </goals>
                         <configuration>
+                            <deb>
+                                ${project.build.directory}/${project.artifactId}_${project.version}.deb
+                            </deb>
                             <verbose>true</verbose>
-                            <controlDir>${project.build.directory}/deb/control</controlDir>
+                            <controlDir>${project.basedir}/src/deb/control</controlDir>
                             <dataSet>
                                 <data>
-                                    <src>${project.build.directory}/${project.build.finalName}.war</src>
+                                    <src>${project.build.directory}/${nexus-webapp.artifactId}-${nexus-webapp.version}.war</src>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
-                                        <prefix>${webapp.deployLocation}</prefix>
-                                        <user>loader</user>
-                                        <group>loader</group>
+                                        <prefix>${debian.sonatype-nexus-home}</prefix>
+                                        <user>root</user>
+                                        <group>root</group>
                                     </mapper>
+                                </data>
+                                <data>
+                                    <type>link</type>
+                                    <linkName>${debian.webapps-home}${debian.webappPath}.war</linkName>
+                                    <linkTarget>${debian.sonatype-nexus-home}/${nexus-webapp.artifactId}-${nexus-webapp.version}.war</linkTarget>
+                                    <symlink>true</symlink>
                                 </data>
                             </dataSet>
                         </configuration>
@@ -124,23 +120,38 @@
                 </executions>
             </plugin>
 			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>${maven-release-plugin.version}</version>
-			</plugin>
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-release-plugin</artifactId>
+		<version>${maven-release-plugin.version}</version>
+		<configuration>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <pushChanges>false</pushChanges>
+                    <localCheckout>true</localCheckout>
+                </configuration>
+	    </plugin>
         </plugins>
+
     </build>
 	
-	<distributionManagement>
-		<snapshotRepository>
-			<id>docprocess-dx-snapshots</id>
-			<url>http://dev.doc-process.com/nexus/content/repositories/dx-snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>docprocess-dx-releases</id>
-			<url>http://dev.doc-process.com/nexus/content/repositories/dx-releases</url>
-		</repository>
-	</distributionManagement>
-    
+    <distributionManagement>
+	<snapshotRepository>
+	   <id>docprocess-dx-snapshots</id>
+	   <url>http://dev.doc-process.com/nexus/content/repositories/dx-snapshots</url>
+	</snapshotRepository>
+	<repository>
+	   <id>docprocess-dx-releases</id>
+	   <url>http://dev.doc-process.com/nexus/content/repositories/dx-releases</url>
+	</repository>
+    </distributionManagement>
+     
+    <developers>
+	<developer>
+	    <id>apiticas</id>
+	    <name>Piticas Alexandru</name>
+	    <email>piticas.alexandru@gmail.com</email>
+	    <organization>DocProcess</organization>
+	</developer>    
+    </developers>
+
 </project>
