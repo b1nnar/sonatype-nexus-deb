@@ -19,4 +19,4 @@ After installation, you can access the web application at:
 ~~~
  http://hostname:8080/nexus
 ~~~
-using default username admin and password admin123.
+using default username **admin** and password **admin123**.
